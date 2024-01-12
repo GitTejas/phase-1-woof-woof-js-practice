@@ -1,6 +1,7 @@
 const dogAPI = 'http://localhost:3000/pups'
 const dogBar = document.getElementById('dog-bar')
 const dogInfo = document.getElementById('dog-info')
+const filterDogs = document.getElementById('good-dog-filter')
 
 let dogList = []
 
@@ -45,26 +46,33 @@ function populateDog(dog) {
     dogInfo.append(dogImage, pupName, dogButton)
     dogButton.addEventListener('click', () => {
         currentDogID = dog.id
-        changeDog(dog, dogButton)
-    })
-    }
-
-function changeDog(dog, dogButton) {
-     dogButton.textContent = dog.isGoodDog? "Bad Dog!" : "Good Dog!"
-
-    fetch(`${dogAPI}/${currentDogID}`, {
-        headers,
-        method: 'PATCH',
-        body: JSON.stringify({
-            isGoodDog: !isGoodDog
+        // changeDog(dog, dogButton)
+        dogButton.textContent = dog.isGoodDog? "Bad Dog!" : "Good Dog!"
+        let newIsGoodDogValue = !dog.isGoodDog
+        fetch(`${dogAPI}/${currentDogID}`, {
+            headers,
+            method: 'PATCH',
+            body: JSON.stringify({
+                isGoodDog: newIsGoodDogValue
+            })
         })
+        .then(resp => resp.json())
+        .then(json => {
+            dogList[currentDogID].isGoodDog = json.isGoodDog
+            renderDogs()
+        })
+    })}
+
+let filterToggle = true
+
+    filterDogs.addEventListener('click', () => {
+        filterToggle = !filterToggle
+        filterDogs.textContent = filterToggle? "Filter good dogs: OFF" : "Filter good dogs: ON"
+        const puppyFilter = dogList.filter(dog => dog.isGoodDog === true)
+        console.log(puppyFilter)
     })
-    .then(resp => resp.json())
-    .then(json => {
-        dogList[currentDogID].isGoodDog = json.isGoodDog
-        renderDogs()
-    })
-}
+
+
 
 /*
 ### STEP 4: TOGGLE GOOD DOG
